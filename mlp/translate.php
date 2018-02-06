@@ -32,23 +32,17 @@ class Translate {
 	 * @return Array                 Modified array of data.
 	 */
 	public function translate_content_on_copy( $data, $main_site_id, $post_id, $remote_site_id ) {
-		error_log( var_export( $data, 1 ) );
+
 		$site_language = mlp_get_blog_language( $data['siteID'] );
 
 		$title         = $this->translate( $data['title']  , $site_language );
 		$content       = $this->translate( $data['content'], $site_language );
 		$excerpt       = $this->translate( $data['excerpt'], $site_language );
 
-		$slug          = sanitize_title( $title );
-
 		$data['tinyMCEContent'] = $content;
 		$data['title']          = $title;
-		$data['slug']           = $slug;
 		$data['content']        = $content;
 		$data['excerpt']        = $excerpt;
-
-		error_log( var_export( $data, 1 ) );
-
 
 		return $data;
 	}
