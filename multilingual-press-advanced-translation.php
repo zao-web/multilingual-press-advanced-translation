@@ -4,7 +4,7 @@ namespace Zao\ZMLPAT;
 /**
  * Plugin Name: MultilingualPress Advanced Translations
  * Plugin URI:  https://zao.is
- * Description: Adds
+ * Description: Infuses the Google Translated version of the content when copying source data to a new page.
  * Version:     0.1.0
  * Author:      Zao
  * Author URI:  https://zao.is
@@ -92,7 +92,7 @@ function setup() {
 	require_once ZMLPAT_PATH . 'vendor/autoload.php';
 
 	add_action( 'init', $n( 'i18n' ) );
-	add_action( 'init', $n( 'init' ) );
+	add_action( 'mlp_and_wp_loaded', $n( 'init' ) );
 
 	do_action( 'zmlpat_loaded' );
 }
@@ -126,18 +126,11 @@ function init() {
 		define( 'ZMLPAT_DEBUG', false );
 	}
 
-	$zmlpat = Plugin::get_instance();
+	$zmlpat = new MLP\Translate;
 
-	add_action( 'zmlpat_init', array( $zmlpat, 'init' ) );
+	add_action( 'zmlpat_init', array( $zmlpat, 'setup' ) );
 
 	do_action( 'zmlpat_init' );
 }
 
-add_action(
-    'mlp_and_wp_loaded',
-    function( Inpsyde_Property_List_Interface $mlp_data ) {
-
-        $mlp_data->loader->add_rule( new Inpsyde_Directory_Load( __DIR__ . '/mlp' ) );
-
-        ( new ZMLPAT() )->setup();
-});
+setup();

@@ -1,15 +1,16 @@
 <?php
+namespace Zao\ZMLPAT\MLP;
 
-class ZMLPAT {
+class Translate {
 
 	private $gt_client;
-	private $key = 'AIzaSyBbNuJFY93HtvkTruBa-cct3G612cMPbf8';
+	private $key = 'AIzaSyD7_f5723Q504rz-4NDA291Wn6UCFK8g74';
 
 	public function __construct() {
 	}
 
 	public function setup() {
-		add_filter( 'mlp_process_post_data_for_remote_site', array( $this, 'translate_content_on_copy' ), 10, 4 );
+		add_filter( 'mlp_process_post_data_for_remote_site', array( $this, 'translate_content_on_copy' ), 100, 4 );
 	}
 
 	/**
@@ -27,21 +28,27 @@ class ZMLPAT {
 	 * @param  Integer $main_site_id   Main site ID (Generally the English site)
 	 * @param  Integer $post_id        Post ID.
 	 * @param  Integer $remote_site_id Remote Site ID, used to get the language target.
+	 *
 	 * @return Array                 Modified array of data.
 	 */
 	public function translate_content_on_copy( $data, $main_site_id, $post_id, $remote_site_id ) {
-
+		error_log( var_export( $data, 1 ) );
 		$site_language = mlp_get_blog_language( $data['siteID'] );
+
 		$title         = $this->translate( $data['title']  , $site_language );
 		$content       = $this->translate( $data['content'], $site_language );
 		$excerpt       = $this->translate( $data['excerpt'], $site_language );
+
 		$slug          = sanitize_title( $title );
 
+		$data['tinyMCEContent'] = $content;
 		$data['title']          = $title;
 		$data['slug']           = $slug;
-		$data['tinyMCEContent'] = '';
 		$data['content']        = $content;
 		$data['excerpt']        = $excerpt;
+
+		error_log( var_export( $data, 1 ) );
+
 
 		return $data;
 	}
@@ -62,13 +69,13 @@ class ZMLPAT {
 		$response = json_decode( wp_remote_retrieve_body( $translation ) );
 
 		if ( null === $response ) {
-			wp_send_json_error( __( 'The Google Translate API returned malformed JSON that we could not interpret. Try again later!' ) );
+			return $text;
 		}
 
 		if ( 200 !== $code ) {
-			wp_send_json_error( $response->error->message, $response->error->code );
+			return $text;
 		} else {
-			wp_send_json_success( $response->data->translations[0]->translatedText );
+			return $response->data->translations[0]->translatedText;
 		}
 
 	}
